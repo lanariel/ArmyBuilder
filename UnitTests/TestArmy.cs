@@ -9,6 +9,7 @@ namespace UnitTests
     using Constants = MiscDefines;
 
     [TestClass]
+    [Serializable]
     public class TestArmy : Army
     {
         #region AddUnit

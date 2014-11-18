@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Core.MagicItems
 {
+    [Serializable]
     public class MagicItem
     {
     }

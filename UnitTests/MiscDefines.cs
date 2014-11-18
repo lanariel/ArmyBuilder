@@ -14,19 +14,19 @@ namespace UnitTests
         public const string CoreSystem = "CoreSystem";
 
         #region CoreSystemPasses
-        public const string CoreSystemSave = "CoreSystemPassSave";
-        public const string CoreSystemLoad = "CoreSystemPassLoad";
-        public const string CoreSystemShow = "CoreSystemPassShow";
+        public const string CoreSystemSaveLoad = "CoreSystemPassSaveLoad";
+        public const string CoreSystemFileName = "TestArmy.army";
+        public const string CoreSystemShowUnits = "CoreSystemPassShow";
         #endregion
 
         #region ArmyPasses
-        public const string ArmyPassAddUnit = "AddUnit";
-        public const string ArmyPassRemoveUnit = "RemoveUnit";
+        public const string ArmyPassAddUnit = "ArmyPassAddUnit";
+        public const string ArmyPassRemoveUnit = "ArmyPassRemoveUnit";
         #endregion
 
         #region UnitPasses
-        public const string UnitPassAddMagicItem = "AddMagicItem";
-        public const string UnitPassRemoveMagicItem = "RemoveMagicItem";
+        public const string UnitPassAddMagicItem = "UnitPassAddMagicItem";
+        public const string UnitPassRemoveMagicItem = "UnitPassRemoveMagicItem";
         #endregion
     }
 }
