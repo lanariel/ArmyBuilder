@@ -10,6 +10,13 @@ namespace Core
     [Serializable]
     public abstract class Army : INotifyPropertyChanged
     {
+        class ConstStrings
+        {
+            internal const string PointCost = "PointCost";
+            internal const string Units = "Units";
+        }
+        
+
         private int pointCost;
 
         public int PointCost
@@ -18,7 +25,7 @@ namespace Core
             protected set
             {
                 pointCost = value;
-                Notify("PointCost");
+                Notify(ConstStrings.PointCost);
             }
         }
 
@@ -35,7 +42,7 @@ namespace Core
             if (u == null)
                 return;
             unit.Add(u);
-            Notify("Units");
+            Notify(ConstStrings.Units);
         }
 
 

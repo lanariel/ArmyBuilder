@@ -10,6 +10,11 @@ namespace Core
     [Serializable]
     public class Unit : INotifyPropertyChanged
     {
+        class ConstStrings
+        {
+            internal const string Name = "Name";
+            internal const string MagicItem = "MagicItem";
+        }
         private string name;
 
         public string Name
@@ -18,7 +23,7 @@ namespace Core
             set
             {
                 name = value;
-                Notify("Name");
+                Notify(ConstStrings.Name);
             }
         }
 
@@ -54,7 +59,7 @@ namespace Core
             private set
             {
                 magicItem = value;
-                   Notify("MagicItem");
+                   Notify(ConstStrings.MagicItem);
             }
         }
 
