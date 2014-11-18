@@ -37,5 +37,15 @@ namespace UnitTests
             Assert.AreEqual(2, a2.Units.Length);
             Assert.IsNotNull(a2.Units[0].MagicItem);
         }
+
+        [TestMethod]
+        [TestProperty(Constants.TestPass, Constants.CoreSystemShowUnits)]
+        [TestCategory(Constants.CoreSystem)]
+        public void ShowUnits()
+        {
+            Unit[] u = CoreSystem.ShowUnits();
+
+            Assert.AreEqual(1, u.Length);
+        }
     }
 }

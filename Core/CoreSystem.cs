@@ -28,5 +28,10 @@ namespace Core
 
             throw new FormatException();
         }
+
+        public static Unit[] ShowUnits()
+        {
+            return new Unit[] { new Unit() };
+        }
     }
 }
