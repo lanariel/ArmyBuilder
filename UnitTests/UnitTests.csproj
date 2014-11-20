@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DefaultArmy.cs" />
     <Compile Include="MiscDefines.cs" />
     <Compile Include="TestCoreSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -60,14 +61,6 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0d05a83f-c7fb-49ff-b376-40a8512042ea}</Project>
       <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TestArmy\TestArmy.csproj">
-      <Project>{4d23a01e-6c25-4c34-acc7-90075a5d90d6}</Project>
-      <Name>TestArmy</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TestGUI\TestGUI.csproj">
-      <Project>{ee583e62-5ab5-4507-ba86-453da12f3049}</Project>
-      <Name>TestGUI</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

@@ -5,6 +5,7 @@ namespace Core.Attributes
     /// <summary>
     /// Attribute to denote valid assembly for consumption by army builder
     /// </summary>
+    [AttributeUsage(AttributeTargets.Assembly)]
     public class ArmyCompatibleDLLAttribute : System.Attribute
     {
         string ArmyName;
