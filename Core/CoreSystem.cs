@@ -11,27 +11,5 @@ namespace Core
     static public class CoreSystem
     {
         static BinaryFormatter binaryFormatter = new BinaryFormatter();
-        public static void Save(Army a, string p)
-        {
-            FileStream fs = new FileStream(p, FileMode.Create);
-            binaryFormatter.Serialize(fs, a);
-            fs.Flush();
-            fs.Close();
-        }
-
-        public static Army Load(string p)
-        {
-            FileStream fs = new FileStream(p, FileMode.Open);
-            object o = binaryFormatter.Deserialize(fs);
-            if (o is Army)
-                return (Army)o;
-
-            throw new FormatException();
-        }
-
-        public static Unit[] ShowUnits()
-        {
-            return new Unit[] { new Unit() };
-        }
     }
 }
