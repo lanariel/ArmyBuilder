@@ -95,55 +95,112 @@ namespace UnitTests
         #endregion
 
         #region Points
-        const string CorePoints = "CorePoints";
-        const string SpecialPoints = "SpecialPoints";
-        const string RarePoints = "RarePoints";
-        const string HeroPoints = "HeroPoints";
-        const string LordPoints = "LordPoints";
+        #region Core
         [Test]
-        [TestCase(0, 0, 0, 0, 0, InvalidReason.CorePoint, TestName="Core: 0 Rest: 0", Category = CorePoints)]
-        [TestCase(10, 0, 0, 0, 0, InvalidReason.CorePoint, TestName = "Core: 10 Rest: 0", Category = CorePoints)]
-        [TestCase(24, 0, 0, 0, 0, InvalidReason.CorePoint, TestName = "Core: 24 Rest: 0 ", Category = CorePoints)]
-
-        [TestCase(0, 10, 10, 10, 10, InvalidReason.CorePoint, TestName = "Core: 0 Rest: 10", Category = CorePoints)]
-        [TestCase(10, 10, 10, 10, 10, InvalidReason.CorePoint, TestName = "Core: 10 Rest: 10", Category = CorePoints)]
-        [TestCase(24, 10, 10, 10, 10, InvalidReason.CorePoint, TestName = "Core: 24 Rest: 10", Category = CorePoints)]
-
-        [TestCase(0, 100, 100, 100, 100, InvalidReason.CorePoint, TestName = "Core: 0 Rest: 100", Category = CorePoints)]
-        [TestCase(10, 100, 100, 100, 100, InvalidReason.CorePoint, TestName = "Core: 10 Rest: 100", Category = CorePoints)]
-        [TestCase(24, 100, 100, 100, 100, InvalidReason.CorePoint, TestName = "Core: 24 Rest: 100", Category = CorePoints)]
-
-        [TestCase(0, 26, 0, 0, 0, InvalidReason.SpecialPoint, TestName = "Special: 26 Rest: 0", Category=SpecialPoints)]
-        [TestCase(0, 50, 0, 0, 0, InvalidReason.SpecialPoint, TestName = "Special: 50 Rest: 0", Category = SpecialPoints)]
-        [TestCase(0, 100, 0, 0, 0, InvalidReason.SpecialPoint, TestName = "Special: 100 Rest: 0", Category = SpecialPoints)]
-
-        public void PercentPerUnitCategory(int Core,int Special, int Rare, int Hero, int Lord, InvalidReason reason)
+        [Category("CorePoint")]
+        public void NoCore()
         {
             Validator v = new Validator();
-            List<Unit> units = new List<Unit>();
-
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Core, Points: Core));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Points: Special));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Points: Rare));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Hero, Points: Hero));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Lord, Points: Lord));
+            var units = TestHelper.CreateArmy(Core: 0);
 
             var res = v.Validate(units);
 
             Assert.True(res.Any());
-            Assert.Contains(reason, res.ToList());
+            Assert.True(res.Any(r => r == InvalidReason.CorePoint));
         }
+
+        [Test]
+        [Category("CorePoint")]
+        public void FiveUnits()
+        {
+            Validator v = new Validator();
+            var units = TestHelper.CreateArmy(Core: 1, Special: 1, Rare: 1, Hero: 1, Lord: 1);
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.CorePoint));
+        }
+        #endregion
+        #region Special
+        [Test]
+        [Category("SpecialPoint")]
+        public void SpecialPoint()
+        {
+            Validator v = new Validator();
+            var units = TestHelper.CreateArmy(Core: 3, Special: 6, Rare: 0, Hero: 1, Lord: 0);
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.SpecialPoint));
+        }
+        #endregion
+        #region Rare
+        [Test]
+        [Category("RarePoint")]
+        public void RarePoint()
+        {
+            Validator v = new Validator();
+            var units = TestHelper.CreateArmy(Core:1, Special:0, Rare:2, Hero:1, Lord:0);
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any(), "valid");
+            Assert.True(res.Any(r => r == InvalidReason.RarePoint));
+        }
+        #endregion
+        #region Hero
+        [Test]
+        [Category("HeroPoint")]
+        public void HeroPoint()
+        {
+            Validator v = new Validator();
+            var units = TestHelper.CreateArmy(Core: 2, Special: 0, Rare: 0, Hero: 2, Lord: 0);
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.HeroPoint));
+        }
+        #endregion
+        #region Lord
+        [Test]
+        [Category("LordPoint")]
+        public void LordPoint()
+        {
+            Validator v = new Validator();
+            var units = TestHelper.CreateArmy(Core: 2, Special: 0, Rare: 0, Hero: 0, Lord: 2);
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.LordPoint));
+        }
+        #endregion
         #endregion
 
         #region Valid
 
         [Test]
         [Category("Valid")]
-        public void ValidArmy()
+        public void CoreHero()
         {
             Validator v = new Validator();
 
             var res = v.Validate(TestHelper.CreateArmy());
+
+            Assert.False(res.Any());
+        }
+
+        [Test]
+        [Category("Valid")]
+        public void NoLord()
+        {
+            Validator v = new Validator();
+            IEnumerable<Unit> units = TestHelper.CreateArmy(1, 1, 1, 1);
+
+            var res = v.Validate(units);
 
             Assert.False(res.Any());
         }

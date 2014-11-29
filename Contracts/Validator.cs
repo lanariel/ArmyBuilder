@@ -49,19 +49,57 @@ namespace Contracts
                 errors.Add(InvalidReason.CorePoint);
             }
 
+            if (!ValidateSpecialPercent(Units, totalpoints))
+            {
+                errors.Add(InvalidReason.SpecialPoint);
+            }
+
+            if (!ValidateRarePercent(Units, totalpoints))
+            {
+                errors.Add(InvalidReason.RarePoint);
+            }
+
+            if (!ValidateHeroPercent(Units, totalpoints))
+            {
+                errors.Add(InvalidReason.HeroPoint);
+            }
+
+            if (!ValidateLordPercent(Units, totalpoints))
+            {
+                errors.Add(InvalidReason.LordPoint);
+            }
+
             return errors;
+        }
+
+        protected virtual bool ValidateHeroPercent(IEnumerable<Unit> Units, int TotalPoints)
+        {
+            int hero = (from u in Units where u.Category == UnitCategory.Hero select u.Points).Sum();
+            return (double)hero / TotalPoints <= 0.25d;
+        }
+
+        protected virtual bool ValidateLordPercent(IEnumerable<Unit> Units, int TotalPoints)
+        {
+            int lord = (from u in Units where u.Category == UnitCategory.Lord select u.Points).Sum();
+            return (double)lord / TotalPoints <= 0.25d;
+        }
+
+        protected virtual bool ValidateRarePercent(IEnumerable<Unit> Units, int TotalPoints)
+        {
+            int rare = (from u in Units where u.Category == UnitCategory.Rare select u.Points).Sum();
+            return (double)rare / TotalPoints <= 0.25d;
         }
 
         protected virtual bool ValidateSpecialPercent(IEnumerable<Unit> Units, int TotalPoints)
         {
-            int core = (from u in Units where u.Category == UnitCategory.Special select u.Points).Sum();
-            return (double)core / TotalPoints > 0.25d;
+            int special = (from u in Units where u.Category == UnitCategory.Special select u.Points).Sum();
+            return (double)special / TotalPoints <= 0.5d;
         }
 
         protected virtual bool ValidateCorePercent(IEnumerable<Unit> Units, int TotalPoints)
         {
             int core = (from u in Units where u.Category == UnitCategory.Core select u.Points).Sum();
-            return (double)core/TotalPoints < 0.25d;
+            return (double)core/TotalPoints >= 0.25d;
         }
 
         protected virtual bool ValidateCharacterExists(IEnumerable<Unit> Units)
