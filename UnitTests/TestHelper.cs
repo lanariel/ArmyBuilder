@@ -9,20 +9,21 @@ namespace UnitTests
 {
     static class TestHelper
     {
-        public static Unit CreateUnit( UnitCategory Category = UnitCategory.Core, int Points= 1)
+        public static Unit CreateUnit(UnitCategory Category = UnitCategory.Core, int Points = 1, string UnitName = "")
         {
             Unit u = new Unit();
             u.Category = Category;
             u.Points = Points;
+            u.UnitName = UnitName;
             return u;
         }
 
-        public static IEnumerable<Unit> CreateUnits(UnitCategory Category= UnitCategory.Core, int Points=1, int Amount = 1)
+        public static IEnumerable<Unit> CreateUnits(UnitCategory Category= UnitCategory.Core, int Points=1, int Amount = 1, string UnitName="")
         {
             List<Unit> units = new List<Unit>();
             for (int i = 0; i < Amount; i++)
             {
-                units.Add(CreateUnit(Category, Points));
+                units.Add(CreateUnit(Category, Points, UnitName));
             }
             return units;
         }

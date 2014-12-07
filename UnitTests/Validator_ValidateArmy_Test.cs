@@ -95,6 +95,7 @@ namespace UnitTests
         #endregion
 
         #region Points
+
         #region Core
         [Test]
         [Category("CorePoint")]
@@ -122,6 +123,7 @@ namespace UnitTests
             Assert.True(res.Any(r => r == InvalidReason.CorePoint));
         }
         #endregion
+
         #region Special
         [Test]
         [Category("SpecialPoint")]
@@ -136,6 +138,7 @@ namespace UnitTests
             Assert.True(res.Any(r => r == InvalidReason.SpecialPoint));
         }
         #endregion
+
         #region Rare
         [Test]
         [Category("RarePoint")]
@@ -150,6 +153,7 @@ namespace UnitTests
             Assert.True(res.Any(r => r == InvalidReason.RarePoint));
         }
         #endregion
+
         #region Hero
         [Test]
         [Category("HeroPoint")]
@@ -164,6 +168,7 @@ namespace UnitTests
             Assert.True(res.Any(r => r == InvalidReason.HeroPoint));
         }
         #endregion
+
         #region Lord
         [Test]
         [Category("LordPoint")]
@@ -178,6 +183,103 @@ namespace UnitTests
             Assert.True(res.Any(r => r == InvalidReason.LordPoint));
         }
         #endregion
+
+        #region Total
+
+        [Test]
+        [Category("TotalPoints")]
+        public void TotalPoints()
+        {
+            Validator v = new Validator();
+            v.Config.Points = 4;
+            List<Unit> units = new List<Unit>(TestHelper.CreateArmy(Core:4));
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.TotalPoint));
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Duplicates
+        
+        #region Special
+        
+        [Test]
+        [Category("Duplicates")]
+        public void SpecialAllDuplicates()
+        {
+            Validator v = new Validator();
+            List<Unit> units = new List<Unit>(TestHelper.CreateArmy(4, 4, 0, 4, 4));
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.DuplicateSpecial));
+        }
+
+        [Test]
+        [Category("Duplicates")]
+        public void SpecialOneOfTwoDuplicates()
+        {
+            Validator v = new Validator();
+            List<Unit> units = new List<Unit>(TestHelper.CreateArmy(20, 0, 0, 5, 5));
+            string Unit1 = "Special1";
+            string Unit2 = "Special2";
+
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 3, UnitName: Unit1));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 3, UnitName: Unit2));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 1, UnitName: Unit1));
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any(), "No Error");
+            Assert.True(res.Any(r => r == InvalidReason.DuplicateSpecial),"Wrong Error");
+            Assert.True(v.DuplicateSpecial.Any(r => r == Unit1), "Wrong Unit");
+        }
+
+        #endregion
+
+        #region Rare
+        
+        [Test]
+        [Category("Duplicates")]
+        public void RareAllDuplicates()
+        {
+            Validator v = new Validator();
+            List<Unit> units = new List<Unit>(TestHelper.CreateArmy(3, 0, 3, 3, 3));
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.DuplicateRare));
+        }
+
+        [Test]
+        [Category("Duplicates")]
+        public void RareOneOfTwoDuplicates()
+        {
+            Validator v = new Validator();
+            List<Unit> units = new List<Unit>(TestHelper.CreateArmy(20, 0, 0, 5, 5));
+            string Unit1 = "Rare1";
+            string Unit2 = "Rare2";
+
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 2, UnitName: Unit1));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 2, UnitName: Unit2));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 1, UnitName: Unit1));
+
+            var res = v.Validate(units);
+
+            Assert.True(res.Any());
+            Assert.True(res.Any(r => r == InvalidReason.DuplicateRare));
+            Assert.True(v.DuplicateRare.Any(r => r == Unit1));
+        }
+
+        #endregion
+
         #endregion
 
         #region Valid
@@ -201,6 +303,30 @@ namespace UnitTests
             IEnumerable<Unit> units = TestHelper.CreateArmy(1, 1, 1, 1);
 
             var res = v.Validate(units);
+
+            Assert.False(res.Any());
+        }
+
+        [Test]
+        [Category("Valid")]
+        public void WithDuplicates()
+        {
+            Validator v = new Validator();
+            IEnumerable<Unit> units = TestHelper.CreateArmy(20, 3, 2, 1);
+
+            var res = v.Validate(units);
+
+            Assert.False(res.Any());
+        }
+
+        [Test]
+        [Category("Valid")]
+        public void GrandArmyWithDuplicates()
+        {
+            Validator v = new Validator();
+            v.Config.Points = 4000;
+
+            var res = v.Validate(TestHelper.CreateArmy(3500, 6, 4, 400, 90));
 
             Assert.False(res.Any());
         }

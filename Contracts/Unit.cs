@@ -33,6 +33,20 @@ namespace Contracts
             set { category = value; }
         }
 
+        private string unitName;
 
+        public string UnitName
+        {
+            get { return unitName; }
+            set { unitName = value; }
+        }
+
+        private string companyName;
+
+        public string CompanyName
+        {
+            get { return companyName; }
+            set { companyName = value; }
+        }
     }
 }
