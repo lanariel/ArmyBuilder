@@ -19,6 +19,8 @@ namespace Contracts
         TotalPoint,
         DuplicateSpecial,
         DuplicateRare,
+        GeneralIsBSB,
+        GeneralIsNotCharacter,
         Other,
     }
 
@@ -39,9 +41,18 @@ namespace Contracts
 
         public IEnumerable<string> DuplicateRare { get { return duplicatesRare; } }
 
-        public ISet<InvalidReason> Validate(IEnumerable<Unit> Units)
+        public ISet<InvalidReason> Validate(Army Army)
         {
+
             ISet<InvalidReason> errors = new HashSet<InvalidReason>();
+            duplicatesSpecial.Clear();
+            duplicatesRare.Clear();
+            if (Army == null)
+            {
+                errors.Add(InvalidReason.NullUnit);
+                return errors;
+            }
+            IEnumerable<Unit> Units = Army.Units;
 
             if (Units == null || Units.Contains(null))
             {
@@ -59,42 +70,76 @@ namespace Contracts
                 errors.Add(InvalidReason.NoCharacter);
             }
 
-            ValidatePoints(Units, errors);
+            int totalpoints;
+            if (Army.Points == 0)
+            {
+                totalpoints = (from u in Units select u.Points).Sum();
+            }
+            else
+            {
+                totalpoints = Army.Points;
+            }
 
-            if (!ValidateSpecialDuplicte(Units))
+            ValidatePoints(Units, errors, totalpoints);
+
+            if (!ValidateSpecialDuplicte(Units, totalpoints))
             {
                 errors.Add(InvalidReason.DuplicateSpecial);
             }
 
-            if (!ValidateRareDuplicate(Units))
+            if (!ValidateRareDuplicate(Units, totalpoints))
             {
                 errors.Add(InvalidReason.DuplicateRare);
+            }
+
+            if (!ValidateGeneralIsCharacter(Army.General))
+            {
+                errors.Add(InvalidReason.GeneralIsNotCharacter);
+            }
+
+            if (!ValidateGeneralIsNotBSB(Army.General, Army.BsB))
+            {
+                errors.Add(InvalidReason.GeneralIsBSB);
             }
 
             return errors;
         }
 
-        protected virtual bool ValidateRareDuplicate(IEnumerable<Unit> Units)
+        private bool ValidateGeneralIsNotBSB(Unit General, Unit BSB)
+        {
+            if (General == null)
+                return false;
+            if (BSB == null)
+                return true;
+            return General != BSB;
+        }
+
+        protected bool ValidateGeneralIsCharacter(Unit unit)
+        {
+            if (unit == null)
+                return false;
+            return unit.Category == UnitCategory.Hero || unit.Category == UnitCategory.Lord;
+        }
+
+        protected virtual bool ValidateRareDuplicate(IEnumerable<Unit> Units, int totalPoints)
         {
             var rare = Units.Where(u => u.Category == UnitCategory.Rare);
-            duplicatesRare.Clear();
-            bool b = DuplicateCheck(rare, config.RareDuplicates, ref duplicatesRare);
+            bool b = DuplicateCheck(rare, config.RareDuplicates, ref duplicatesRare, totalPoints);
             return b;
         }
 
-        protected virtual bool ValidateSpecialDuplicte(IEnumerable<Unit> Units)
+        protected virtual bool ValidateSpecialDuplicte(IEnumerable<Unit> Units, int totalPoints)
         {
             var special = Units.Where(u => u.Category == UnitCategory.Special);
-            duplicatesSpecial.Clear();
-            bool b = DuplicateCheck(special, config.SpecialDuplicates, ref duplicatesSpecial);
+            bool b = DuplicateCheck(special, config.SpecialDuplicates, ref duplicatesSpecial, totalPoints);
             return b;
         }
 
-        protected bool DuplicateCheck(IEnumerable<Unit> Units, int choises, ref List<string> models)
+        protected bool DuplicateCheck(IEnumerable<Unit> Units, int choises, ref List<string> models, int ArmyPoints)
         {
             
             Dictionary<string, List<Unit>> duplicates = new Dictionary<string, List<Unit>>();
-            if (config.Points >= config.GrandArmyLimit)
+            if (ArmyPoints >= config.GrandArmyLimit)
                 choises *= 2;
             foreach (var u in Units)
             {
@@ -120,17 +165,9 @@ namespace Contracts
             return isValid;
         }
 
-        private void ValidatePoints(IEnumerable<Unit> Units, ISet<InvalidReason> errors)
+        private void ValidatePoints(IEnumerable<Unit> Units, ISet<InvalidReason> errors, int totalpoints)
         {
-            int totalpoints;
-            if (config.Points == 0)
-            {
-                totalpoints = (from u in Units select u.Points).Sum();
-            }
-            else
-            {
-                totalpoints = config.Points;
-            }
+            
 
             if (!ValidateCorePercent(Units, totalpoints))
             {

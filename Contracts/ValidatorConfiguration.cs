@@ -8,14 +8,6 @@ namespace Contracts
 {
     public class ValidatorConfiguration
     {
-        private int points = 0;
-
-        public int Points
-        {
-            get { return points; }
-            set { points = value; }
-        }
-
         private double lordPercent = 0.25d;
 
         public double LordPercent

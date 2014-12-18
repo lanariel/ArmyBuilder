@@ -28,9 +28,10 @@ namespace UnitTests
             return units;
         }
 
-        public static IEnumerable<Unit> CreateArmy(int Core = 3, int Special = 0, int Rare = 0, int Hero = 1, int Lord = 0)
+        public static Army CreateArmy(int Core = 3, int Special = 0, int Rare = 0, int Hero = 1, int Lord = 0, int GeneralIndex = -1)
         {
-            List<Unit> units = new List<Unit>();
+            Army a = new Army();
+            List<Unit> units = a.Units;
 
             for (int i = 0; i < Core; i++)
             {
@@ -56,7 +57,24 @@ namespace UnitTests
             {
                 units.Add(CreateUnit(Category: UnitCategory.Lord));
             }
-            return units;
+
+            if (GeneralIndex == -1)
+            {
+                int i = Core + Special + Rare + Hero + Lord - 1;
+                if (i > -1)
+                {
+                    a.General = a.Units[i];
+                }
+                else
+                {
+                    a.General = null;
+                }
+            }
+            else
+            {
+                a.General = a.Units[GeneralIndex];
+            }
+            return a;
         }
     }
 }
