@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Contracts
 {
-    public enum UnitCategory
+    public enum UnitCategory 
     {
         Lord,
         Hero,
@@ -15,7 +15,7 @@ namespace Contracts
         Rare,
     }
 
-    public class Unit
+    public class Unit : ITroopData
     {
         private int points;
 
@@ -24,21 +24,10 @@ namespace Contracts
             get { return points; }
             set { points = value; }
         }
-
-        private UnitCategory category;
-
-        public UnitCategory Category
+        public virtual UnitCategory Category
         {
-            get { return category; }
-            set { category = value; }
-        }
-
-        private string unitName;
-
-        public string UnitName
-        {
-            get { return unitName; }
-            set { unitName = value; }
+            get { return TroopData.Category; }
+            set { TroopData.Category = value; }
         }
 
         private string companyName;
@@ -47,6 +36,32 @@ namespace Contracts
         {
             get { return companyName; }
             set { companyName = value; }
+        }
+
+
+        public ITroopData TroopData { get; set; }
+        public virtual bool IsUnique
+        {
+            get
+            {
+                return TroopData.IsUnique;
+            }
+            set
+            {
+                TroopData.IsUnique = value;
+            }
+        }
+
+        public virtual string Name
+        {
+            get
+            {
+                return TroopData.Name;
+            }
+            set
+            {
+                TroopData.Name = value;
+            }
         }
     }
 }

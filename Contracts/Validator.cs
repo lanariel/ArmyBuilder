@@ -34,12 +34,12 @@ namespace Contracts
             set { config = value; }
         }
 
-        List<string> duplicatesSpecial = new List<string>();
-        List<string> duplicatesRare = new List<string>();
+        List<ITroopData> duplicatesSpecial = new List<ITroopData>();
+        List<ITroopData> duplicatesRare = new List<ITroopData>();
 
-        public IEnumerable<string> DuplicateSpecial { get { return duplicatesSpecial; } }
+        public IEnumerable<ITroopData> DuplicateSpecial { get { return duplicatesSpecial; } }
 
-        public IEnumerable<string> DuplicateRare { get { return duplicatesRare; } }
+        public IEnumerable<ITroopData> DuplicateRare { get { return duplicatesRare; } }
 
         public ISet<InvalidReason> Validate(Army Army)
         {
@@ -135,21 +135,21 @@ namespace Contracts
             return b;
         }
 
-        protected bool DuplicateCheck(IEnumerable<Unit> Units, int choises, ref List<string> models, int ArmyPoints)
+        protected bool DuplicateCheck(IEnumerable<Unit> Units, int choises, ref List<ITroopData> models, int ArmyPoints)
         {
-            
-            Dictionary<string, List<Unit>> duplicates = new Dictionary<string, List<Unit>>();
+
+            Dictionary<ITroopData, List<Unit>> duplicates = new Dictionary<ITroopData, List<Unit>>();
             if (ArmyPoints >= config.GrandArmyLimit)
                 choises *= 2;
             foreach (var u in Units)
             {
-                if (duplicates.ContainsKey(u.UnitName))
+                if (duplicates.ContainsKey(u.TroopData))
                 {
-                    duplicates[u.UnitName].Add(u);
+                    duplicates[u.TroopData].Add(u);
                 }
                 else
                 {
-                    duplicates.Add(u.UnitName, new List<Unit>() { u });
+                    duplicates.Add(u.TroopData, new List<Unit>() { u });
                 }
             }
             bool isValid = true;

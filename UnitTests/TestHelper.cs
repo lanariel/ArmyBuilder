@@ -9,21 +9,30 @@ namespace UnitTests
 {
     static class TestHelper
     {
-        public static Unit CreateUnit(UnitCategory Category = UnitCategory.Core, int Points = 1, string UnitName = "")
+        static TestHelper()
         {
+            foreach (UnitCategory category in (UnitCategory[]) Enum.GetValues(typeof(UnitCategory)))
+            {
+                TroopDatas.Add(category, new TroopData() { Name = category.ToString(), IsUnique = false, Category = category });
+            }
+        }
+        static Dictionary<UnitCategory, TroopData> TroopDatas = new Dictionary<UnitCategory,TroopData>();
+        public static Unit CreateUnit(UnitCategory Category = UnitCategory.Core, int Points = 1, ITroopData TroopData = null)
+        {
+            if (TroopData == null)
+                TroopData = TroopDatas[Category];
             Unit u = new Unit();
-            u.Category = Category;
+            u.TroopData = TroopData;
             u.Points = Points;
-            u.UnitName = UnitName;
             return u;
         }
 
-        public static IEnumerable<Unit> CreateUnits(UnitCategory Category= UnitCategory.Core, int Points=1, int Amount = 1, string UnitName="")
+        public static IEnumerable<Unit> CreateUnits(UnitCategory Category= UnitCategory.Core, int Points=1, int Amount = 1, ITroopData TroopData = null)
         {
             List<Unit> units = new List<Unit>();
             for (int i = 0; i < Amount; i++)
             {
-                units.Add(CreateUnit(Category, Points, UnitName));
+                units.Add(CreateUnit(Category, Points, TroopData));
             }
             return units;
         }

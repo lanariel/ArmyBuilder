@@ -257,12 +257,12 @@ namespace UnitTests
             Validator v = new Validator();
             Army a = TestHelper.CreateArmy(20, 0, 0, 5, 5);
             List<Unit> units = a.Units;
-            string Unit1 = "Special1";
-            string Unit2 = "Special2";
+            TroopData Unit1 = new TroopData() { Name = "Special1", Category = UnitCategory.Special };
+            TroopData Unit2 = new TroopData() { Name = "Special2", Category = UnitCategory.Special };
 
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 3, UnitName: Unit1));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 3, UnitName: Unit2));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 1, UnitName: Unit1));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 3, TroopData: Unit1));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 3, TroopData: Unit2));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Special, Amount: 1, TroopData: Unit1));
 
             var res = v.Validate(a);
 
@@ -295,12 +295,12 @@ namespace UnitTests
             Validator v = new Validator();
             var a = TestHelper.CreateArmy(20, 0, 0, 5, 5);
             List<Unit> units = a.Units;
-            string Unit1 = "Rare1";
-            string Unit2 = "Rare2";
+            TroopData Unit1 = new TroopData() { Name = "Rare1", Category = UnitCategory.Rare };
+            TroopData Unit2 = new TroopData() { Name = "Rare2", Category = UnitCategory.Rare };
 
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 2, UnitName: Unit1));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 2, UnitName: Unit2));
-            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 1, UnitName: Unit1));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 2, TroopData: Unit1));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 2, TroopData: Unit2));
+            units.AddRange(TestHelper.CreateUnits(Category: UnitCategory.Rare, Amount: 1, TroopData: Unit1));
 
             var res = v.Validate(a);
 
