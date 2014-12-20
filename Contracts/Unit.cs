@@ -63,5 +63,53 @@ namespace Contracts
                 TroopData.Name = value;
             }
         }
+
+        public virtual int PointsPerModel
+        {
+            get
+            {
+                return TroopData.PointsPerModel;
+            }
+            set
+            {
+                TroopData.PointsPerModel = value;
+            }
+        }
+
+        public virtual int MinSize
+        {
+            get
+            {
+                return TroopData.MinSize;
+            }
+            set
+            {
+                TroopData.MinSize = value;
+            }
+        }
+
+        public virtual int MaxSize
+        {
+            get
+            {
+                return TroopData.MaxSize;
+            }
+            set
+            {
+                TroopData.MaxSize = value;
+            }
+        }
+
+        public virtual TroopType TroopType
+        {
+            get
+            {
+                return TroopData.TroopType;
+            }
+            set
+            {
+                TroopData.TroopType = value;
+            }
+        }
     }
 }

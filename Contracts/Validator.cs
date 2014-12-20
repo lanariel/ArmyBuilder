@@ -8,7 +8,6 @@ namespace Contracts
 {
     public enum InvalidReason
     {
-        NullUnit,
         FewUnits,
         NoCharacter,
         CorePoint,
@@ -28,14 +27,24 @@ namespace Contracts
     {
         ValidatorConfiguration config = new ValidatorConfiguration();
 
+        public Validator()
+        {
+            foreach(UnitCategory category in (UnitCategory[])Enum.GetValues(typeof(UnitCategory)))
+            {
+                UnitList.Add(category, new List<Unit>());
+            }
+        }
+
         public ValidatorConfiguration Config
         {
             get { return config; }
             set { config = value; }
         }
 
-        List<ITroopData> duplicatesSpecial = new List<ITroopData>();
-        List<ITroopData> duplicatesRare = new List<ITroopData>();
+        protected List<ITroopData> duplicatesSpecial = new List<ITroopData>();
+        protected List<ITroopData> duplicatesRare = new List<ITroopData>();
+        protected ISet<InvalidReason> errors = new HashSet<InvalidReason>();
+        protected Dictionary<UnitCategory, List<Unit>> UnitList = new Dictionary<UnitCategory, List<Unit>>();
 
         public IEnumerable<ITroopData> DuplicateSpecial { get { return duplicatesSpecial; } }
 
@@ -43,95 +52,98 @@ namespace Contracts
 
         public ISet<InvalidReason> Validate(Army Army)
         {
+            PreValidationSetup(Army);
 
-            ISet<InvalidReason> errors = new HashSet<InvalidReason>();
-            duplicatesSpecial.Clear();
-            duplicatesRare.Clear();
-            if (Army == null)
-            {
-                errors.Add(InvalidReason.NullUnit);
-                return errors;
-            }
-            IEnumerable<Unit> Units = Army.Units;
-
-            if (Units == null || Units.Contains(null))
-            {
-                errors.Add(InvalidReason.NullUnit);
-                return errors;
-            }
-
-            if (!ValidateNumberOfUnits(Units))
+            if (!ValidateNumberOfUnits(Army))
             {
                 errors.Add(InvalidReason.FewUnits);
-            }
-
-            if (!ValidateCharacterExists(Units))
-            {
-                errors.Add(InvalidReason.NoCharacter);
             }
 
             int totalpoints;
             if (Army.Points == 0)
             {
-                totalpoints = (from u in Units select u.Points).Sum();
+                totalpoints = (from u in Army.Units select u.Points).Sum();
             }
             else
             {
                 totalpoints = Army.Points;
             }
 
-            ValidatePoints(Units, errors, totalpoints);
+            ValidatePoints(Army, totalpoints);
 
-            if (!ValidateSpecialDuplicte(Units, totalpoints))
+            if (!ValidateSpecialDuplicte(Army, totalpoints))
             {
                 errors.Add(InvalidReason.DuplicateSpecial);
             }
 
-            if (!ValidateRareDuplicate(Units, totalpoints))
+            if (!ValidateRareDuplicate(Army, totalpoints))
             {
                 errors.Add(InvalidReason.DuplicateRare);
             }
 
-            if (!ValidateGeneralIsCharacter(Army.General))
-            {
-                errors.Add(InvalidReason.GeneralIsNotCharacter);
-            }
-
-            if (!ValidateGeneralIsNotBSB(Army.General, Army.BsB))
-            {
-                errors.Add(InvalidReason.GeneralIsBSB);
-            }
+            ValidateGeneral(Army);
 
             return errors;
         }
 
-        private bool ValidateGeneralIsNotBSB(Unit General, Unit BSB)
+        private void PreValidationSetup(Army Army)
         {
-            if (General == null)
-                return false;
-            if (BSB == null)
+            errors.Clear();
+            duplicatesSpecial.Clear();
+            duplicatesRare.Clear();
+            foreach (UnitCategory category in (UnitCategory[])Enum.GetValues(typeof(UnitCategory)))
+            {
+                UnitList[category].Clear();
+            }
+
+            foreach (var unit in Army.Units)
+            {
+                UnitList[unit.Category].Add(unit);
+            }
+        }
+
+        private void ValidateGeneral(Army Army)
+        {
+
+            if (Army.General == null )
+            {
+                errors.Add(InvalidReason.NoCharacter);
+                return;
+            }
+
+            if (!ValidateGeneralIsCharacter(Army))
+            {
+                errors.Add(InvalidReason.GeneralIsNotCharacter);
+            }
+
+            if (!ValidateGeneralIsNotBSB(Army))
+            {
+                errors.Add(InvalidReason.GeneralIsBSB);
+            }
+            
+        }
+
+        protected virtual bool ValidateGeneralIsNotBSB(Army a)
+        {
+            if (a.BsB == null)
                 return true;
-            return General != BSB;
+            return a.General != a.BsB;
         }
 
-        protected bool ValidateGeneralIsCharacter(Unit unit)
+        protected bool ValidateGeneralIsCharacter(Army a)
         {
-            if (unit == null)
-                return false;
-            return unit.Category == UnitCategory.Hero || unit.Category == UnitCategory.Lord;
+            return a.General.Category == UnitCategory.Hero || a.General.Category == UnitCategory.Lord;
         }
 
-        protected virtual bool ValidateRareDuplicate(IEnumerable<Unit> Units, int totalPoints)
+        protected virtual bool ValidateRareDuplicate(Army a, int totalPoints)
         {
-            var rare = Units.Where(u => u.Category == UnitCategory.Rare);
-            bool b = DuplicateCheck(rare, config.RareDuplicates, ref duplicatesRare, totalPoints);
+            bool b = DuplicateCheck(UnitList[UnitCategory.Rare], config.RareDuplicates, ref duplicatesRare, totalPoints);
             return b;
         }
 
-        protected virtual bool ValidateSpecialDuplicte(IEnumerable<Unit> Units, int totalPoints)
+        protected virtual bool ValidateSpecialDuplicte(Army a, int totalPoints)
         {
-            var special = Units.Where(u => u.Category == UnitCategory.Special);
-            bool b = DuplicateCheck(special, config.SpecialDuplicates, ref duplicatesSpecial, totalPoints);
+            bool b = DuplicateCheck(UnitList[UnitCategory.Special], config.SpecialDuplicates, ref duplicatesSpecial, totalPoints);
             return b;
         }
 
@@ -165,85 +177,80 @@ namespace Contracts
             return isValid;
         }
 
-        private void ValidatePoints(IEnumerable<Unit> Units, ISet<InvalidReason> errors, int totalpoints)
+        private void ValidatePoints(Army a, int totalpoints)
         {
             
 
-            if (!ValidateCorePercent(Units, totalpoints))
+            if (!ValidateCorePercent( a, totalpoints))
             {
                 errors.Add(InvalidReason.CorePoint);
             }
 
-            if (!ValidateSpecialPercent(Units, totalpoints))
+            if (!ValidateSpecialPercent( a, totalpoints))
             {
                 errors.Add(InvalidReason.SpecialPoint);
             }
 
-            if (!ValidateRarePercent(Units, totalpoints))
+            if (!ValidateRarePercent( a, totalpoints))
             {
                 errors.Add(InvalidReason.RarePoint);
             }
 
-            if (!ValidateHeroPercent(Units, totalpoints))
+            if (!ValidateHeroPercent( a, totalpoints))
             {
                 errors.Add(InvalidReason.HeroPoint);
             }
 
-            if (!ValidateLordPercent(Units, totalpoints))
+            if (!ValidateLordPercent( a, totalpoints))
             {
                 errors.Add(InvalidReason.LordPoint);
             }
 
-            if (!ValidateTotalPoints(Units, totalpoints))
+            if (!ValidateTotalPoints( a, totalpoints))
             {
                 errors.Add(InvalidReason.TotalPoint);
             }
         }
 
-        protected virtual bool ValidateTotalPoints(IEnumerable<Unit> Units, int totalpoints)
+        protected virtual bool ValidateTotalPoints(Army a, int totalpoints)
         {
-            int total = (from u in Units select u.Points).Sum();
+            int total = (from u in a.Units select u.Points).Sum();
             return total <= totalpoints;
         }
 
-        protected virtual bool ValidateHeroPercent(IEnumerable<Unit> Units, int TotalPoints)
+        protected virtual bool ValidateHeroPercent(Army a, int TotalPoints)
         {
-            int hero = (from u in Units where u.Category == UnitCategory.Hero select u.Points).Sum();
+            int hero = UnitList[UnitCategory.Hero].Sum(s => s.Points);
             return (double)hero / TotalPoints <= config.HeroPercent;
         }
 
-        protected virtual bool ValidateLordPercent(IEnumerable<Unit> Units, int TotalPoints)
+        protected virtual bool ValidateLordPercent(Army a, int TotalPoints)
         {
-            int lord = (from u in Units where u.Category == UnitCategory.Lord select u.Points).Sum();
+            int lord = UnitList[UnitCategory.Lord].Sum(s => s.Points);
             return (double)lord / TotalPoints <= config.LordPercent;
         }
 
-        protected virtual bool ValidateRarePercent(IEnumerable<Unit> Units, int TotalPoints)
+        protected virtual bool ValidateRarePercent(Army a, int TotalPoints)
         {
-            int rare = (from u in Units where u.Category == UnitCategory.Rare select u.Points).Sum();
+            int rare = UnitList[UnitCategory.Rare].Sum(s => s.Points);
             return (double)rare / TotalPoints <= config.RarePercent;
         }
 
-        protected virtual bool ValidateSpecialPercent(IEnumerable<Unit> Units, int TotalPoints)
+        protected virtual bool ValidateSpecialPercent(Army a, int TotalPoints)
         {
-            int special = (from u in Units where u.Category == UnitCategory.Special select u.Points).Sum();
+            int special = UnitList[UnitCategory.Special].Sum(s => s.Points);
             return (double)special / TotalPoints <= config.SpecialPercent;
         }
 
-        protected virtual bool ValidateCorePercent(IEnumerable<Unit> Units, int TotalPoints)
+        protected virtual bool ValidateCorePercent(Army a, int TotalPoints)
         {
-            int core = (from u in Units where u.Category == UnitCategory.Core select u.Points).Sum();
+            int core = UnitList[UnitCategory.Core].Sum(s => s.Points);
             return (double)core/TotalPoints >= config.CorePercent;
         }
 
-        protected virtual bool ValidateCharacterExists(IEnumerable<Unit> Units)
+        protected virtual bool ValidateNumberOfUnits(Army a)
         {
-            return Units.Any(u => u.Category == UnitCategory.Hero || u.Category == UnitCategory.Lord);
-        }
-
-        protected virtual bool ValidateNumberOfUnits(IEnumerable<Unit> Units)
-        {
-            return Units.Count(u => u.Category != UnitCategory.Hero && u.Category != UnitCategory.Lord) >= 3;
+            return a.Units.Count(u => u.Category != UnitCategory.Hero && u.Category != UnitCategory.Lord) >= 3;
         }
     }
 }

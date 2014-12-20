@@ -18,5 +18,13 @@ namespace Contracts
         public string Name { get; set; }
 
         public UnitCategory Category { get; set; }
+
+        public int PointsPerModel { get; set; }
+
+        public int MinSize { get; set; }
+
+        public int MaxSize { set; get; }
+
+        public TroopType TroopType { get; set; }
     }
 }

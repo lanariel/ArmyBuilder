@@ -14,14 +14,12 @@ namespace UnitTests
 
         [Test]
         [Category("Null")]
+        [ExpectedException( typeof(NullReferenceException))]
         public void NullArmy()
         {
             Validator v = new Validator();
 
             var res = v.Validate(null);
-
-            Assert.True(res.Any());
-            Assert.True(res.Any(r => r == InvalidReason.NullUnit));
         }
 
         [Test]
@@ -29,6 +27,7 @@ namespace UnitTests
         [TestCase(2, 0, Category = "Null")]
         [TestCase(2, 1, Category = "Null")]
         [TestCase(3, 1, Category = "Null")]
+        [ExpectedException(typeof(NullReferenceException))]
         public void NullUnit(int NrOfUnits, int NullUnit)
         {
             Validator v = new Validator();
@@ -44,10 +43,6 @@ namespace UnitTests
             }
 
             var res = v.Validate(a);
-
-            Assert.True(res.Any());
-            Assert.True(res.Any(r => r == InvalidReason.NullUnit));
-            Assert.True(res.Count(r => r == InvalidReason.NullUnit) == res.Count());
         }
 
         #endregion
